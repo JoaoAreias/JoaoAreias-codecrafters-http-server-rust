@@ -4,16 +4,70 @@ use std::net::{TcpListener, TcpStream};
 
 const BUFFER_SIZE: usize = 255;
 
-enum Response {
+enum ResponseStatus {
     Ok,
     NotFound
 }
 
-impl Response {
+impl ResponseStatus {
     fn as_str(&self) -> &'static str {
         match self {
-            Response::Ok => "HTTP/1.1 200 OK\r\n\r\n",
-            Response::NotFound => "HTTP/1.1 404 Not Found\r\n\r\n"
+            ResponseStatus::Ok => "HTTP/1.1 200 OK\r\n\r\n",
+            ResponseStatus::NotFound => "HTTP/1.1 404 Not Found\r\n\r\n"
+        }
+    }
+}
+struct Response {
+    status: ResponseStatus,
+    content_type: Option<String>,
+    content_length: Option<usize>,
+    content: Option<String>
+}
+
+impl Response {
+    fn as_str(&self) -> String {
+        match self.status {
+            ResponseStatus::Ok => {
+                let default_content_type = "text/plain".to_string();
+                let default_content = "".to_string();
+                let content_type = self.content_type
+                    .as_ref().unwrap_or(&default_content_type);
+                let content_length = self.content_length.unwrap_or(0);
+                let content = self.content.as_ref()
+                    .unwrap_or(&default_content);
+
+                format!(
+                    "{}\r\nContent-Type: {}\r\nContent-Length: {}\r\n\r\n{}",
+                    self.status.as_str(),
+                    content_type,
+                    content_length,
+                    content
+                )
+            },
+            _ => self.status.as_str().to_string()
+        }
+    }
+}
+
+fn resolve_path(path: &str) -> Response {
+    let parts: Vec<&str> = path.split("/")
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    match parts.as_slice() {
+        ["echo", text] => {
+            Response {
+                status: ResponseStatus::Ok,
+                content_type: Some("text/plain".to_string()),
+                content_length: Some(text.len()),
+                content: Some(text.to_string())
+            }
+        }
+        _ => Response {
+            status: ResponseStatus::NotFound,
+            content_type: None,
+            content_length: None,
+            content: None
         }
     }
 }
@@ -80,12 +134,10 @@ fn handle_stream(mut stream: TcpStream) -> Result<(), String> {
 
             let headers = parse_request(&data)?;
 
-            let response  = if headers.get("path").ok_or("Invalid header")? == "/" {
-                Response::Ok.as_str()
-            } else {
-                Response::NotFound.as_str()
-            };
-            stream.write_all(response.as_bytes())
+            let response  = resolve_path(
+                headers.get("path").ok_or("Invalid header")?
+            );
+            stream.write_all(response.as_str().as_bytes())
                 .map_err(|e| format!("Failed to write response: {}", e))?;
         }
         Err(e) => {
