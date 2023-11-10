@@ -18,6 +18,19 @@ pub fn router(request: HTTPRequest) -> HTTPResponse {
         ["echo", parts @ ..] => {
             let content = parts.join("/");
             make_http_response(HTTPResponseStatus::Ok, Some(content))
+        },
+        ["user-agent"] => {
+            let user_agent = request.header.get("user-agent");
+            match user_agent {
+                Some(agent) => make_http_response(
+                    HTTPResponseStatus::Ok,
+                    Some(agent.to_string())
+                ),
+                None => make_http_response(
+                    HTTPResponseStatus::NotFound,
+                    None
+                )
+            }
         }
         _ => make_http_response(HTTPResponseStatus::NotFound, None)
     }
