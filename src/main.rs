@@ -50,7 +50,8 @@ impl Response {
 }
 
 fn resolve_path(path: &str) -> Response {
-    let parts: Vec<&str> = path.split("/")
+    let parts: Vec<&str> = path
+        .split("/")
         .filter(|s| !s.is_empty())
         .collect();
 
@@ -63,7 +64,8 @@ fn resolve_path(path: &str) -> Response {
                 content: None
             }
         }
-        ["echo", text] => {
+        ["echo", parts @ ..] => {
+            let text = parts.join("/");
             Response {
                 status: ResponseStatus::Ok,
                 content_type: Some("text/plain".to_string()),
