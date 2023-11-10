@@ -37,7 +37,7 @@ impl Response {
                     .unwrap_or(&default_content);
 
                 format!(
-                    "{}\r\nContent-Type: {}\r\nContent-Length: {}\r\n\r\n{}",
+                    "{}\r\n\r\nContent-Type: {}\r\nContent-Length: {}\r\n\r\n{}",
                     self.status.as_str(),
                     content_type,
                     content_length,
@@ -69,7 +69,7 @@ fn resolve_path(path: &str) -> Response {
             Response {
                 status: ResponseStatus::Ok,
                 content_type: Some("text/plain".to_string()),
-                content_length: Some(text.len()),
+                content_length: Some(text.as_bytes().len()),
                 content: Some(text.to_string())
             }
         }
