@@ -85,15 +85,13 @@ pub fn parse_http_request(request: &str) -> Result<HTTPRequest, String> {
 pub enum HTTPResponseStatus {
     Ok,
     NotFound,
-    ImATeaPot
 }
 
 impl HTTPResponseStatus {
     fn as_str(&self) -> &'static str {
         match self {
-            HTTPResponseStatus::Ok => "HTTP/1.1 200 OK\r\n\r\n",
-            HTTPResponseStatus::NotFound => "HTTP/1.1 404 Not Found\r\n\r\n",
-            HTTPResponseStatus::ImATeaPot => "HTTP/1.1 418 I'm a teapot\r\n\r\n"
+            HTTPResponseStatus::Ok => "HTTP/1.1 200 OK\r\n",
+            HTTPResponseStatus::NotFound => "HTTP/1.1 404 Not Found\r\n",
         }
     }
 }
@@ -110,13 +108,20 @@ impl HTTPResponse {
 
         if let Some(header) = &self.header {
             for (k, v) in header.into_iter() {
-                out_string = format!("{}{}: {}\r\n", out_string, k.as_str(), v.as_str());
+                out_string.push_str(k);
+                out_string.push_str(": ");
+                out_string.push_str(v);
+                out_string.push_str("\r\n");
             }
         }
 
+        out_string.push_str("\r\n");
+
         if let Some(body) = &self.body {
-            out_string = format!("{}\r\n{}", out_string, body);
+            out_string.push_str(body);
+            out_string.push_str("\r\n");
         }
+
         out_string
     }
 }
