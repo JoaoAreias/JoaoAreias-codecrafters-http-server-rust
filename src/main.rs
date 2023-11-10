@@ -1,23 +1,34 @@
 mod http;
 mod handler;
-use std::net::TcpListener;
+use tokio::net::TcpListener;
 
-fn main() {
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    println!("Logs from your program will appear here!");
-    let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
+#[tokio::main]
+async fn main() {
+    println!("Server is starting...");
 
-    for stream in listener.incoming() {
-        match stream {
-            Ok(_stream) => {
-                println!("accepted new connection");
-                if let Err(e) = handler::handle_request(_stream) {
-                    println!("Error handling stream: {}", e);
-                }
-            }
-            Err(e) => {
-                println!("error: {}", e);
-            }
+    let listener = match TcpListener::bind("127.0.0.1:4221").await {
+        Ok(listener) => listener,
+        Err(e) => {
+            eprintln!("Failed to bind to the port: {}", e);
+            return;
         }
+    };
+
+    loop {
+        let (stream, addr) = match listener.accept().await {
+            Ok((stream, addr)) => (stream, addr),
+            Err(e) => {
+                eprintln!("Failed to accept connection: {}", e);
+                continue;
+            }
+        };
+
+        println!("Accepting connection from {}", addr);
+
+        tokio::spawn(async move {
+            if let Err(e) = handler::handle_request(stream).await {
+                println!("Connection with {} failed: {}", addr, e);
+            }
+        });
     }
 }

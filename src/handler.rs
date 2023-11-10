@@ -1,6 +1,6 @@
 
-use std::net::TcpStream;
-use std::io::{Read, Write};
+use tokio::net::TcpStream;
+use tokio::io::AsyncWriteExt;
 
 use crate::http::*;
 
@@ -37,10 +37,10 @@ pub fn router(request: HTTPRequest) -> HTTPResponse {
 }
 
 
-pub fn handle_request(mut stream: TcpStream) -> Result<(), String>{
+pub async fn handle_request(mut stream: TcpStream) -> Result<(), String>{
     let mut buffer = vec![0; BUFFER_SIZE];
 
-    match stream.read(&mut buffer){
+    match stream.try_read(&mut buffer){
         Ok(bytes_read) =>{
             let data = String::from_utf8(buffer.into_iter().take(bytes_read).collect())
                 .map_err(|e| format!("Error decoding UTF-8: {}", e))?;
@@ -48,7 +48,7 @@ pub fn handle_request(mut stream: TcpStream) -> Result<(), String>{
             let request = parse_http_request(data.as_str())?;
             let response  = router(request);
 
-            stream.write_all(response.to_string().as_bytes())
+            stream.write_all(response.to_string().as_bytes()).await
                 .map_err(|e| format!("Failed to write response: {}", e))?;
         }
         Err(e) => {
