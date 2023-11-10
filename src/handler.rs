@@ -1,6 +1,6 @@
 
 use tokio::net::TcpStream;
-use tokio::io::AsyncWriteExt;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 use crate::http::*;
 
@@ -40,7 +40,7 @@ pub fn router(request: HTTPRequest) -> HTTPResponse {
 pub async fn handle_request(mut stream: TcpStream) -> Result<(), String>{
     let mut buffer = vec![0; BUFFER_SIZE];
 
-    match stream.try_read(&mut buffer){
+    match stream.read(&mut buffer).await {
         Ok(bytes_read) =>{
             let data = String::from_utf8(buffer.into_iter().take(bytes_read).collect())
                 .map_err(|e| format!("Error decoding UTF-8: {}", e))?;
