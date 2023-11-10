@@ -55,6 +55,14 @@ fn resolve_path(path: &str) -> Response {
         .collect();
 
     match parts.as_slice() {
+        [] => {
+            Response {
+                status:ResponseStatus::Ok,
+                content_type: None,
+                content_length: None,
+                content: None
+            }
+        }
         ["echo", text] => {
             Response {
                 status: ResponseStatus::Ok,
