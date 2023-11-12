@@ -1,3 +1,26 @@
+# Build Your Own HTTP server - Challenge.
+
+This is my implementation for the Code crafter's Build Your Own HTTP server" Challenge.
+In this challenge I've implemented a simple HTTP server in Rust capable of:
+
+- Handling GET requests
+- Handling concurrent connections
+- Receiving and saving a file through a post request and saving it on a directory
+
+You can build the project through Cargo through:
+
+`cargo build`
+
+To run the server please use:
+
+`./your_server.sh --directory <directory>`
+
+> :warning: **This is s toy project and should not be used in production**
+
+For more information and to check out their project please see their links bellow.
+
+---
+
 [![progress-banner](https://backend.codecrafters.io/progress/http-server/bf2ad5a6-9d71-4b03-b0ee-c1b9ad60df89)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
 This is a starting point for Rust solutions to the
@@ -13,27 +36,3 @@ and more.
 
 **Note**: If you're viewing this repo on GitHub, head over to
 [codecrafters.io](https://codecrafters.io) to try the challenge.
-
-# Passing the first stage
-
-The entry point for your HTTP server implementation is in `src/main.rs`. Study
-and uncomment the relevant code, and push your changes to pass the first stage:
-
-```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
-```
-
-Time to move on to the next stage!
-
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `cargo (1.70)` installed locally
-1. Run `./your_server.sh` to run your program, which is implemented in
-   `src/main.rs`. This command compiles your Rust project, so it might be slow
-   the first time you run it. Subsequent runs will be fast.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
