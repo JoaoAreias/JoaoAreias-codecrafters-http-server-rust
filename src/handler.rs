@@ -17,7 +17,7 @@ fn get_file(filename: &str, directory: Arc<String>) -> Option<String> {
 fn save_file(filename: &str, directory: Arc<String>, content: String) -> Result<(), String>{
     let path = format!("{}/{}", *directory, filename);
 
-    let mut file = File::open(path).expect("Fail to open file");
+    let mut file = File::create(path).expect("Fail to open file");
     file.write_all(content.as_bytes()).expect("Fail to write to file");
 
     Ok(())
