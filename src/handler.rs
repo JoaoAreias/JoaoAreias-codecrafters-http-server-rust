@@ -20,39 +20,27 @@ pub fn router(request: HTTPRequest, directory: Arc<String>) -> HTTPResponse {
         .collect();
 
     match path_parts.as_slice() {
-        [] => make_http_response(HTTPResponseStatus::Ok, None),
+        [] => make_http_200_return_text("".to_string()),
         ["echo", parts @ ..] => {
             let content = parts.join("/");
-            make_http_response(HTTPResponseStatus::Ok, Some(content))
+            make_http_200_return_text(content)
         },
         ["user-agent"] => {
             let user_agent = request.header.get("user-agent");
             match user_agent {
-                Some(agent) => make_http_response(
-                    HTTPResponseStatus::Ok,
-                    Some(agent.to_string())
-                ),
-                None => make_http_response(
-                    HTTPResponseStatus::NotFound,
-                    None
-                )
+                Some(agent) => make_http_200_return_text(agent.to_string()),
+                None => make_http_404_not_found()
             }
         },
         ["files", parts@ ..] => {
             let filename = parts.join("/");
             match get_file(&filename, directory) {
-                Some(content) => make_http_response(
-                    HTTPResponseStatus::Ok,
-                    Some(content)
-                ),
-                None => make_http_response(
-                    HTTPResponseStatus::NotFound,
-                    None
-                )
+                Some(content) => make_http_200_return_file(content),
+                None => make_http_404_not_found()
             }
 
         }
-        _ => make_http_response(HTTPResponseStatus::NotFound, None)
+        _ => make_http_404_not_found()
     }
 }
 

@@ -12,7 +12,6 @@ pub enum HTTPMethod {
     TRACE,
     PATCH
 }
-
 fn parse_http_method(method: &str) -> Result<HTTPMethod, String> {
     let method = method.to_uppercase();
     match method.as_str() {
@@ -28,8 +27,6 @@ fn parse_http_method(method: &str) -> Result<HTTPMethod, String> {
         _ => Err("Method not supported".to_string())
     }
 }
-
-
 pub struct HTTPRequest {
     pub method: HTTPMethod,
     pub path: String,
@@ -37,7 +34,6 @@ pub struct HTTPRequest {
     pub header: HashMap<String, String>,
     pub body: Option<String>
 }
-
 pub fn parse_http_request(request: &str) -> Result<HTTPRequest, String> {
     let mut lines = request.lines();
     let start_line = lines.next().ok_or("Empty request".to_string())?;
@@ -81,12 +77,10 @@ pub fn parse_http_request(request: &str) -> Result<HTTPRequest, String> {
         body: if !body.is_empty() { Some(body) } else { None }
     })
 }
-
 pub enum HTTPResponseStatus {
     Ok,
     NotFound,
 }
-
 impl HTTPResponseStatus {
     fn as_str(&self) -> &'static str {
         match self {
@@ -95,13 +89,11 @@ impl HTTPResponseStatus {
         }
     }
 }
-
 pub struct HTTPResponse {
     pub status: HTTPResponseStatus,
     pub header: Option<HashMap<String, String>>,
     pub body: Option<String>
 }
-
 impl HTTPResponse {
     pub fn to_string(&self) -> String{
         let mut out_string = self.status.as_str().to_string();
@@ -126,14 +118,32 @@ impl HTTPResponse {
     }
 }
 
-pub fn make_http_response(status: HTTPResponseStatus, content: Option<String>) -> HTTPResponse {
-    match content {
-        Some(body) => {
-            let mut header = HashMap::new();
-            header.insert("Content-Type".to_string(), "text/plain".to_string());
-            header.insert("Content-Length".to_string(), body.as_bytes().len().to_string());
-            HTTPResponse {status, header: Some(header), body: Some(body)}
-        },
-        None => HTTPResponse {status, header: None, body: None}
+pub fn make_http_404_not_found() -> HTTPResponse {
+    return HTTPResponse {
+        status: HTTPResponseStatus::NotFound,
+        header: None,
+        body: None
+    }
+}
+
+pub fn make_http_200_return_text(content: String) -> HTTPResponse {
+    let mut header = HashMap::new();
+    header.insert("Content-Type".to_string(), "text/plain".to_string());
+    header.insert("Content-Length".to_string(), content.as_bytes().len().to_string());
+    return HTTPResponse {
+        status: HTTPResponseStatus::Ok,
+        header: Some(header),
+        body: Some(content)
+    }
+}
+
+pub fn make_http_200_return_file(content: String) -> HTTPResponse {
+    let mut header = HashMap::new();
+    header.insert("Content-Type".to_string(), "application/octet-stream".to_string());
+    header.insert("Content-Length".to_string(), content.as_bytes().len().to_string());
+    return HTTPResponse {
+        status: HTTPResponseStatus::Ok,
+        header: Some(header),
+        body: Some(content)
     }
 }
