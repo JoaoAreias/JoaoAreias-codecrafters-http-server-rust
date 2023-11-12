@@ -79,12 +79,14 @@ pub fn parse_http_request(request: &str) -> Result<HTTPRequest, String> {
 }
 pub enum HTTPResponseStatus {
     Ok,
+    Created,
     NotFound,
 }
 impl HTTPResponseStatus {
     fn as_str(&self) -> &'static str {
         match self {
             HTTPResponseStatus::Ok => "HTTP/1.1 200 OK\r\n",
+            HTTPResponseStatus::Created => "HTTP/1.1 201 Created\r\n",
             HTTPResponseStatus::NotFound => "HTTP/1.1 404 Not Found\r\n",
         }
     }
@@ -145,5 +147,13 @@ pub fn make_http_200_return_file(content: String) -> HTTPResponse {
         status: HTTPResponseStatus::Ok,
         header: Some(header),
         body: Some(content)
+    }
+}
+
+pub fn make_http_201_created() -> HTTPResponse {
+    return HTTPResponse {
+        status: HTTPResponseStatus::Created,
+        header: None,
+        body: None
     }
 }
